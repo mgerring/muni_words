@@ -22,7 +22,9 @@ def granicus_json_scrape(url, raw = False):
         try:
             j = json.loads(j)
         except ValueError:
-            j = json.loads(re.sub('([{,]\s+)([a-z]+)(: ")', lambda s: '%s"%s"%s' % (s.groups()[0], s.groups()[1], s.groups()[2]), j).replace("\\", ""))
+            ts = re.sub('([{,]\s+)([a-z]+)(: ")', lambda s: '%s"%s"%s' % (s.groups()[0], s.groups()[1], s.groups()[2]), j).replace("\\", "")
+            print ts
+            j = json.loads(ts, strict=False)
         except:
             j = False
     else:
@@ -38,8 +40,8 @@ def build_db(urls):
             if muni == None or muni.name != j['muni']:
                 muni, created = Muni.objects.get_or_create(name=j['muni'])
             
-            text = " ".join([x["text"] if x['type'] != "meta" for x in j['response'][0] ])
-            titles " ".join([x["title"] if x['type'] == "meta" for x in j["response"][0] ])
+            text = " ".join([x["text"] if x['type'] != "meta" else "" for x in j['response'][0] ])
+            titles = " ".join([x["title"] if x['type'] == "meta" else "" for x in j["response"][0] ])
             if text == " ":
                 cc = True
             else:
