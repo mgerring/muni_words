@@ -6,6 +6,8 @@ from models import *
 import datetime
 import htmlentitydefs
 from django.contrib.gis.geos import Point
+from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
+
 
 h = httplib2.Http()
 today = datetime.datetime.today()
@@ -23,7 +25,6 @@ def granicus_json_scrape(domain, clip_id, raw = False):
             j = json.loads(j, strict=False)
         except ValueError:
             ts = re.sub('([{,]\s+)([a-z]+)(: ")', lambda s: '%s"%s"%s' % (s.groups()[0], s.groups()[1], s.groups()[2]), j).replace("\\", "")
-            print g_url
             try:
                 j = json.loads(ts, strict=False)
             except UnicodeDecodeError:
@@ -33,15 +34,27 @@ def granicus_json_scrape(domain, clip_id, raw = False):
             j = False
     else:
         j = False
-    print j
     return j
 
 def build_db(domain, clip_id, muni):
     j = granicus_json_scrape(domain, clip_id)
     if j and len(j) > 0 and len(j[0]) > 0:
         
-        text = unescape(" ".join([x["text"] if x['type'] != "meta" else "" for x in j[0] ]))
-        titles = unescape(" ".join([x["title"] if x['type'] == "meta" else "" for x in j[0] ]))
+        text = " ".join([x["text"] if x['type'] != "meta" else "" for x in j[0] ])
+        titles = " ".join([x["title"] if x['type'] == "meta" else "" for x in j[0] ])
+
+        text_soup = BeautifulSoup(text)
+        new_text = ''.join([e for e in text_soup.recursiveChildGenerator() if isinstance(e, unicode)])
+        title_soup = BeautifulSoup(titles)
+        new_titles = ''.join([e for e in title_soup.recursiveChildGenerator() if isinstance(e, unicode)])
+        
+        text = BeautifulStoneSoup(new_text, convertEntities=BeautifulStoneSoup.ALL_ENTITIES).contents[0]
+        titles = BeautifulStoneSoup(new_titles, convertEntities=BeautifulStoneSoup.ALL_ENTITIES).contents[0]
+
+
+        print text
+        print titles
+
         if text == " ":
             cc = True
         else:
@@ -54,6 +67,9 @@ def build_db(domain, clip_id, muni):
             clip_id = clip_id,
             muni = muni
         )
+
+        print muni
+        print clip_id
 
 def get_clips():
 
@@ -88,7 +104,6 @@ def get_clips():
             try:
                 videos = m_json['hits']['hits']
             except:
-                print content
                 return
 
             for vid in videos:
@@ -96,13 +111,12 @@ def get_clips():
                 if vid['_type'] != 'video':
                     continue
                 else:
-                    print vid['_source']['datetime']
-#                    try:
-                    build_db(m.host_url, vid['_source']['id'], m )
- #                   except:
-  #                      print "ERROR"
+                    try:
+                        build_db(m.host_url, vid['_source']['id'], m )
+                    except Exception as e:
+                        print e
         else:       
-            print content
+            print "Response not OK"
 
 def import_muni():
     
@@ -122,7 +136,7 @@ def import_muni():
             new_agency.name = agency['_source']['name']
             new_agency.state = agency['_source']['state']
             new_agency.host_url = agency['_source']['host']
-            try
+            try:
                 pt = Point(agency['_source']['location'][0],  agency['_source']['location'][1])
                 new_agency.lat_long = pt
             except:
