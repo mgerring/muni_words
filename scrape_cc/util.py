@@ -4,7 +4,8 @@ import json
 import re
 from models import *
 import datetime
-
+import htmlentitydefs
+from django.contrib.gis.geos import Point
 
 h = httplib2.Http()
 today = datetime.datetime.today()
@@ -39,8 +40,8 @@ def build_db(domain, clip_id, muni):
     j = granicus_json_scrape(domain, clip_id)
     if j and len(j) > 0 and len(j[0]) > 0:
         
-        text = " ".join([x["text"] if x['type'] != "meta" else "" for x in j[0] ])
-        titles = " ".join([x["title"] if x['type'] == "meta" else "" for x in j[0] ])
+        text = unescape(" ".join([x["text"] if x['type'] != "meta" else "" for x in j[0] ]))
+        titles = unescape(" ".join([x["title"] if x['type'] == "meta" else "" for x in j[0] ]))
         if text == " ":
             cc = True
         else:
@@ -121,20 +122,35 @@ def import_muni():
             new_agency.name = agency['_source']['name']
             new_agency.state = agency['_source']['state']
             new_agency.host_url = agency['_source']['host']
-            try:
-                new_agency.lat = agency['_source']['location'][0]
-                new_agency.lng = agency['_source']['location'][1]
+            try
+                pt = Point(agency['_source']['location'][0],  agency['_source']['location'][1])
+                new_agency.lat_long = pt
             except:
                 pass
 
             new_agency.save()
 
-         
 
-
-
-
-
+def unescape(text):
+    def fixup(m):
+        text = m.group(0)
+        if text[:2] == "&#":
+            #character reference
+            try:
+                if text[:3] == "&#x":
+                    return unichr(int(text[3:-1], 15))
+                else:
+                    return unichr(int(text[2:-1]))
+            except ValueError:
+                pass
+        else:
+            #named entity
+            try:
+                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+            except KeyError:
+                pass
+        return text # leave as is
+    return re.sub("&#?\w+;", fixup, text)
 
 
 

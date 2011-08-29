@@ -1,12 +1,12 @@
-from django.db import models
+#rom django.db import models
+from django.contrib.gis.db import models
 
 # Create your models here.
 
 class Muni(models.Model):
     name        = models.CharField(max_length=100)
     full_name   = models.CharField(max_length=100, null=True)
-    lat         = models.FloatField(null=True)
-    lng         = models.FloatField(null=True)
+    lat_long    = models.PointField(null=True)
     state       = models.CharField(max_length=2, null=True)
     host_url    = models.CharField(max_length=200, null=True)
     granicus_id = models.IntegerField()
