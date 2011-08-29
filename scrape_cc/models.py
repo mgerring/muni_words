@@ -7,6 +7,10 @@ class Muni(models.Model):
     full_name   = models.CharField(max_length=100, null=True)
     lat         = models.FloatField(null=True)
     lng         = models.FloatField(null=True)
+    state       = models.CharField(max_length=2, null=True)
+    host_url    = models.CharField(max_length=200, null=True)
+    granicus_id = models.IntegerField()
+
 
 class Transcript(models.Model):
     text    = models.TextField(null=True) #this will probably be the closed captions if they exist
