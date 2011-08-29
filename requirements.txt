@@ -1,3 +1,4 @@
+httplib2
 django
 gunicorn
 psycopg2
