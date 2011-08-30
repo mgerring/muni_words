@@ -13,7 +13,7 @@ menu, nav, section, summary, time, mark, audio, video {
 }  
 
 
-
+body { color: #484944; }
 div.container { width: 1024px; margin: 0 auto;}
-div.header h1 { font-family: 'Coming Soon', cursive; font-size: 50pt; width: 300px; display: block; float:left; vertical-align: bottom; margin-top: 30px; }
+div.header h1 { font-family: 'Waiting for the Sunrise', cursive; font-size: 50pt; width: 300px; display: block; float:left; vertical-align: bottom; margin-top: 25px; letter-spacing: 4px; }
 div.header img { display:block; float: right; }
