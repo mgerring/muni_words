@@ -3,14 +3,18 @@
 <head>
 <title>MunicipalWords</title>
 <link href="/static/styles/main.css" rel="stylesheet" type="text/css">
-<link href='http://fonts.googleapis.com/css?family=Dawning+of+a+New+Day|Waiting+for+the+Sunrise|Coming+Soon' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Coming+Soon' rel='stylesheet' type='text/css'>
 </head>
 <body>
     <div class="container">
-        <h1>Talk of the Town</h1>
-         
+        <div class="header">
+            <h1>Talk of the Town</h1>
+            <img src="/static/img/city-scape.jpg" />
+        </div>
+        <div style="clear:both;"></div>
+        <div class="content">
         {% block content %}{% endblock content %}
-
+        </div>
     </div>
 
 </body>
