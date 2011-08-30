@@ -149,7 +149,7 @@ def import_muni():
             new_agency.state = agency['_source']['state']
             new_agency.host_url = agency['_source']['host']
             try:
-                pt = Point(agency['_source']['location'][0],  agency['_source']['location'][1])
+                pt = Point(agency['_source']['location'][1],  agency['_source']['location'][0])  #this is long lat now, instead of lat long
                 new_agency.lat_long = pt
             except:
                 pass
