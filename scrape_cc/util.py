@@ -40,7 +40,8 @@ def granicus_json_scrape(domain, clip_id, raw = False):
 def strip_html(string):
     return ''.join([e for e in BeautifulSoup(string).recursiveChildGenerator() if isinstance(e, unicode)]).replace('&nbsp;', ' ')
 
-def build_db(domain, clip_id, muni):
+def build_db(domain, clip_id, muni, datestring):
+    
     j = granicus_json_scrape(domain, clip_id)
     if j and len(j) > 0 and len(j[0]) > 0:
         
@@ -60,14 +61,17 @@ def build_db(domain, clip_id, muni):
             cc = True
         else:
             cc = False
-        
+    
+            
         try:
+            a_date =  datetime.datetime.strptime(datestring[:-6], '%Y-%m-%dT%H:%M:%S') 
             t = Transcript.objects.get_or_create(clip_id=clip_id, muni=muni)[0]
             t.text = final_text
             t.titles = final_titles
             t.cc = cc
-
+            t.date =  a_date
             t.save()
+
         except Exception as e:
             print "Couldn't save transcript object - %s" % e
 
@@ -104,8 +108,8 @@ def get_clips():
             es_filter_data = '{ "size": %d, "query": {"term": {"agency_id": "%s" }},  "filter": { "range": { "datetime": { "from": "%s", "include_lower": true}}}}' % ( total, m.granicus_id, six_months_ago)
 
             resp, content = h.request("http://govflix.com/api", "POST", body=es_filter_data)
-            m_json = json.loads(content, strict=False)
             try:
+                m_json = json.loads(content, strict=False)
                 videos = m_json['hits']['hits']
             except:
                 return
@@ -116,7 +120,7 @@ def get_clips():
                     continue
                 else:
                     try:
-                        build_db(m.host_url, vid['_source']['id'], m )
+                        build_db(m.host_url, vid['_source']['id'], m, vid['_source']['datetime'])
                     except Exception as e:
                         print "error in build_db for %s - %s - %s" % ( m.host_url, vid['_source']['id'], e)
 
