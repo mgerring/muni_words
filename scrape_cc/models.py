@@ -10,6 +10,8 @@ class Muni(models.Model):
     state       = models.CharField(max_length=2, null=True)
     host_url    = models.CharField(max_length=200, null=True)
     granicus_id = models.IntegerField()
+    
+    objects = models.GeoManager()
 
 
 class Transcript(models.Model):
@@ -19,3 +21,5 @@ class Transcript(models.Model):
     clip_id = models.CharField(max_length=100)
     muni    = models.ForeignKey(Muni)
     date    = models.DateTimeField(null=True, db_index=True)
+    
+    objects = models.GeoManager()
