@@ -9,6 +9,7 @@ from django.conf import settings
 urlpatterns = patterns('',
     # Examples:
     url(r'^$', direct_to_template, {'template': 'index.html'}, name='index'),
+    url(r'^about/$', direct_to_template, {'template': 'about.html'}, name='about'),
     # url(r'^muni_words/', include('muni_words.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
