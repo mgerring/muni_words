@@ -1,4 +1,5 @@
 # Django settings for muni_words project.
+import os
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -6,6 +7,8 @@ TEMPLATE_DEBUG = DEBUG
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
+
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 MANAGERS = ADMINS
 
@@ -103,6 +106,7 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'muni_words.urls'
 
 TEMPLATE_DIRS = (
+    PROJECT_ROOT + '/templates',
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -115,6 +119,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
     'scrape_cc',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
