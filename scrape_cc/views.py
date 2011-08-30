@@ -51,9 +51,15 @@ def cloud(request):
             { 'tag': 'coffee', 'size': 6 },
             { 'tag': 'pycon', 'size': 3 },
             { 'tag': 'html', 'size': 9 },
+            { 'tag': 'python', 'size': 8 },
+            { 'tag': 'Australia', 'size': 1 },
+            { 'tag': 'coffee', 'size': 6 },
+            { 'tag': 'pycon', 'size': 3 },
+            { 'tag': 'html', 'size': 9 },
+
             ]
 
-    render_to_response('cloud.html', {'data': tags }, context_instance=RequestContext(request))
+    return render_to_response('cloud.html', {'data': tags }, context_instance=RequestContext(request))
 
 
 
