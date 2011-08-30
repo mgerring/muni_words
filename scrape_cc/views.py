@@ -35,13 +35,19 @@ def geo_json(request):
             'id': transcript.id,
             'type': 'Feature',
             'geometry': {
-                
+                'type': 'Point',
+                'coordinates': transcript.muni.lat_long.coords,
+            },
+            'properties': {
+                'entity': transcript.muni.name,
+                'occurrences': transcript.occurrences,
+                'date': str(transcript.date.date()),
             }
-        } for transcript in qs]
+        } for transcript in qs if transcript.muni.lat_long is not None]
     }
     
-    return HttpResponse(qs.count())
-
+    return HttpResponse(json.dumps(out), mimetype="application/json")
+    
 def cloud(request):
     
     #call some helper function to get a list of the most frequent words instead of this placeholder
@@ -54,7 +60,3 @@ def cloud(request):
             ]
 
     render_to_response('cloud.html', {'data': tags }, context_instance=RequestContext(request))
-
-
-
-
