@@ -47,21 +47,29 @@ def build_db(domain, clip_id, muni):
         text = " ".join([x["text"] if x['type'] != "meta" else "" for x in j[0] ])
         titles = " ".join([x["title"] if x['type'] == "meta" else "" for x in j[0] ])
 
-        final_text = strip_html(BeautifulStoneSoup(text, convertEntities=BeautifulStoneSoup.ALL_ENTITIES).contents[0])
-        final_titles = strip_html(BeautifulStoneSoup(titles, convertEntities=BeautifulStoneSoup.ALL_ENTITIES).contents[0])
+        try:
+            final_text = strip_html(BeautifulStoneSoup(text, convertEntities=BeautifulStoneSoup.ALL_ENTITIES).contents[0])
+        except:
+            final_text = strip_html(text)
+        try:
+            final_titles = strip_html(BeautifulStoneSoup(titles, convertEntities=BeautifulStoneSoup.ALL_ENTITIES).contents[0])
+        except:
+            final_titles = strip_html(titles)
 
         if final_text == " ":
             cc = True
         else:
             cc = False
         
-        Transcript.objects.get_or_create(
-            text = final_text,
-            titles = final_titles,
-            cc = cc,
-            clip_id = clip_id,
-            muni = muni
-        )
+        try:
+            t = Transcript.objects.get_or_create(clip_id=clip_id, muni=muni)[0]
+            t.text = final_text
+            t.titles = final_titles
+            t.cc = cc
+
+            t.save()
+        except Exception as e:
+            print "Couldn't save transcript object - %s" % e
 
 def get_clips():
 
@@ -110,7 +118,7 @@ def get_clips():
                     try:
                         build_db(m.host_url, vid['_source']['id'], m )
                     except Exception as e:
-                        print e
+                        print "error in build_db for %s - %s - %s" % ( m.host_url, vid['_source']['id'], e)
 
             print "Processed %s videos" % len(videos)
         else:       
