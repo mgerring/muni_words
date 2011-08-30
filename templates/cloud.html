@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Most Popular Terms</h2>
+<div class="tag-cloud">
+    {% for d in data %}
+        <a href="/map/{{d.tag}}" class="size-{{ d.size}}">{{d.tag}}</a>
+    {% endfor %}
+</div>
+
+{% endblock content %}
