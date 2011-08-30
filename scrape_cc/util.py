@@ -36,6 +36,10 @@ def granicus_json_scrape(domain, clip_id, raw = False):
         j = False
     return j
 
+
+def strip_html(string):
+    return ''.join([e for e in BeautifulSoup(string).recursiveChildGenerator() if isinstance(e, unicode)]).replace('&nbsp;', ' ')
+
 def build_db(domain, clip_id, muni):
     j = granicus_json_scrape(domain, clip_id)
     if j and len(j) > 0 and len(j[0]) > 0:
@@ -43,39 +47,31 @@ def build_db(domain, clip_id, muni):
         text = " ".join([x["text"] if x['type'] != "meta" else "" for x in j[0] ])
         titles = " ".join([x["title"] if x['type'] == "meta" else "" for x in j[0] ])
 
-        text_soup = BeautifulSoup(text)
-        new_text = ''.join([e for e in text_soup.recursiveChildGenerator() if isinstance(e, unicode)])
-        title_soup = BeautifulSoup(titles)
-        new_titles = ''.join([e for e in title_soup.recursiveChildGenerator() if isinstance(e, unicode)])
-        
-        text = BeautifulStoneSoup(new_text, convertEntities=BeautifulStoneSoup.ALL_ENTITIES).contents[0]
-        titles = BeautifulStoneSoup(new_titles, convertEntities=BeautifulStoneSoup.ALL_ENTITIES).contents[0]
+        final_text = strip_html(BeautifulStoneSoup(text, convertEntities=BeautifulStoneSoup.ALL_ENTITIES).contents[0])
+        final_titles = strip_html(BeautifulStoneSoup(titles, convertEntities=BeautifulStoneSoup.ALL_ENTITIES).contents[0])
 
-
-        print text
-        print titles
-
-        if text == " ":
+        if final_text == " ":
             cc = True
         else:
             cc = False
         
         Transcript.objects.get_or_create(
-            text = text,
-            titles = titles,
+            text = final_text,
+            titles = final_titles,
             cc = cc,
             clip_id = clip_id,
             muni = muni
         )
 
-        print muni
-        print clip_id
-
 def get_clips():
 
     munis = Muni.objects.all()
-
+    count = 0
+    total_munis = munis.count()
+    
     for m in munis:
+        print "Processing %s of %s total munis - %s" % (count, total_munis, m.name)
+
         es_filter_data = """{ "size": 1, 
                               "query": {
                                         "term": {
@@ -115,8 +111,12 @@ def get_clips():
                         build_db(m.host_url, vid['_source']['id'], m )
                     except Exception as e:
                         print e
+
+            print "Processed %s videos" % len(videos)
         else:       
             print "Response not OK"
+
+        count += 1
 
 def import_muni():
     
