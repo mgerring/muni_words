@@ -18,4 +18,4 @@ class Transcript(models.Model):
     cc      = models.BooleanField() #Whether or not we found closed captioning data
     clip_id = models.CharField(max_length=100)
     muni    = models.ForeignKey(Muni)
-    date    = models.DateTimeField(null=True)
+    date    = models.DateTimeField(null=True, db_index=True)
