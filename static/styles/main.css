@@ -15,5 +15,18 @@ menu, nav, section, summary, time, mark, audio, video {
 
 body { color: #484944; }
 div.container { width: 1024px; margin: 0 auto;}
-div.header h1 { font-family: 'Waiting for the Sunrise', cursive; font-size: 50pt; width: 300px; display: block; float:left; vertical-align: bottom; margin-top: 25px; letter-spacing: 4px; }
+div.header h1 { font-family: 'Waiting for the Sunrise', cursive; font-size: 50pt; width: 300px; display: block; float:left; vertical-align: bottom; margin-top: 25px; margin-right: 250px; letter-spacing: 4px; }
+div.header h1 a { text-decoration: none; }
+div.header h1 a:visited { color: #484944; }
 div.header img { display:block; float: right; }
+div.header { padding-bottom: 0px; border-bottom: solid 3px #484944; float:left; -webkit-box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 1.0); -moz-box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 1.0); box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 1.0);}
+
+ul.nav { float:right; width: 1024px; list-style-type: none; }
+ul.nav li { float: right; width: 12%; margin: 10px; list-style-type:none; font-family: 'Waiting for the Sunrise', cursive; letter-spacing: 4px; font-size: 12pt; font-weight: bold;}
+
+ul.nav li a {color:black; }
+
+div.container form { margin: 20px 10px; padding: 10px; }
+label { font-size: 16pt; } 
+input.search-box { border: 2px solid #D0D0D0; width: 400px; margin-left: 10px; font-style:italic; color:#989898;
+
