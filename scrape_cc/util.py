@@ -7,7 +7,7 @@ import datetime
 import htmlentitydefs
 from django.contrib.gis.geos import Point
 from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
-
+from excludes import EXCLUDED
 
 h = httplib2.Http()
 today = datetime.datetime.today()
@@ -130,6 +130,21 @@ def get_clips():
 
         count += 1
 
+def check_exclude(muni):
+    for e in EXCLUDED:
+        if muni.granicus_id == e[1]:
+            return True
+    return False
+
+def remove_excluded():
+    for ex in EXCLUDED:
+        try:
+            m = Muni.objects.get(granicus_id=ex[1])
+            t = Transcript.objects.filter(muni=m).delete()
+            m.delete()
+        except:
+            pass
+
 def import_muni():
     
     api_url = "http://govflix.com/api?type=agency&size=1"
@@ -141,20 +156,21 @@ def import_muni():
         
         response, text = h.request("http://govflix.com/api?type=agency&size=%s" % total_agencies)
         agencies = json.loads(text, strict=False)
-
+    
         for agency in agencies['hits']['hits']:
-
+            
             new_agency = Muni.objects.get_or_create(granicus_id=agency['_id'])[0]
-            new_agency.name = agency['_source']['name']
-            new_agency.state = agency['_source']['state']
-            new_agency.host_url = agency['_source']['host']
-            try:
-                pt = Point(agency['_source']['location'][1],  agency['_source']['location'][0])  #this is long lat now, instead of lat long
-                new_agency.lat_long = pt
-            except:
-                pass
+            if not check_exclude(new_agency):
+                new_agency.name = agency['_source']['name']
+                new_agency.state = agency['_source']['state']
+                new_agency.host_url = agency['_source']['host']
+                try:
+                    pt = Point(agency['_source']['location'][1],  agency['_source']['location'][0])  #this is long lat now, instead of lat long
+                    new_agency.lat_long = pt
+                except:
+                    pass
 
-            new_agency.save()
+                new_agency.save()
 
 
 def unescape(text):
