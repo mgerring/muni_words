@@ -4,7 +4,7 @@ from django.http import HttpResponse
 import json
 import re
 from scrape_cc import models
-
+from django.views.decorators.cache import cache_page
 from django.db.models import Sum
 
 TERM_CLEANER = re.compile('[^\w\s]+')
@@ -62,7 +62,7 @@ def geo_json(request):
     return HttpResponse(json.dumps(out), mimetype="application/json")
    
    
-    
+@cache_page(60 * 60 * 2)    
 def cloud(request):
     from django.db import connection, transaction
     cursor = connection.cursor()
@@ -76,7 +76,6 @@ def cloud(request):
     for row in words:
         freq = int(row[2])
         tag_weight = 1
-        interval = low
         while freq > low + (step * tag_weight) and tag_weight < 10:
             tag_weight = tag_weight + 1
 
