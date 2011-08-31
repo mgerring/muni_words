@@ -37,6 +37,10 @@ def geo_json(request):
             munis[transcript.muni.id] = []
         munis[transcript.muni.id].append(transcript)
     
+    occurrences = {}
+    for muni in munis.keys():
+        occurrences[muni] = sum([transcript.occurrences for transcript in munis[muni]])
+    
     # build GeoJSON
     out = {
         'type': 'FeatureCollection',
@@ -50,9 +54,9 @@ def geo_json(request):
             'properties': {
                 'entity': muni[0].muni.name,
                 'entity_id': muni[0].muni.id,
-                'occurrences': sum([transcript.occurrences for transcript in muni]),
+                'occurrences': occurrences[muni[0].muni.id],
             }
-        } for muni in munis.values() if muni[0].muni.lat_long is not None]
+        } for muni in sorted(munis.values(), key=lambda m: occurrences[m[0].muni.id], reverse=True) if muni[0].muni.lat_long is not None]
     }
     
     return HttpResponse(json.dumps(out), mimetype="application/json")
