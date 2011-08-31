@@ -5,6 +5,8 @@ import json
 import re
 from scrape_cc import models
 
+from django.db.models import Sum
+
 TERM_CLEANER = re.compile('[^\w\s]+')
 WHITE_SPACE = re.compile('\s+')
 
@@ -35,6 +37,10 @@ def geo_json(request):
             munis[transcript.muni.id] = []
         munis[transcript.muni.id].append(transcript)
     
+    occurrences = {}
+    for muni in munis.keys():
+        occurrences[muni] = sum([transcript.occurrences for transcript in munis[muni]])
+    
     # build GeoJSON
     out = {
         'type': 'FeatureCollection',
@@ -47,9 +53,10 @@ def geo_json(request):
             },
             'properties': {
                 'entity': muni[0].muni.name,
-                'occurrences': sum([transcript.occurrences for transcript in muni]),
+                'entity_id': muni[0].muni.id,
+                'occurrences': occurrences[muni[0].muni.id],
             }
-        } for muni in munis.values() if muni[0].muni.lat_long is not None]
+        } for muni in sorted(munis.values(), key=lambda m: occurrences[m[0].muni.id], reverse=True) if muni[0].muni.lat_long is not None]
     }
     
     return HttpResponse(json.dumps(out), mimetype="application/json")
@@ -77,3 +84,46 @@ def cloud(request):
     #call some helper function to get a list of the most frequent words instead of this placeholder
 
     return render_to_response('cloud.html', {'data': tags }, context_instance=RequestContext(request))
+
+def sparkline(request):
+    if 'term' not in request.GET:
+        return HttpResponse('Term is required.', status=400)
+    
+    term = request.GET['term']
+    term = TERM_CLEANER.sub('', term).strip()
+    term = WHITE_SPACE.sub(' & ', term)
+    
+    # same icky interpolation as above
+    
+    select = "date_trunc('week', date) as week, sum(ts_count(text_vector, to_tsquery('%s')))" % term
+    condition = "text_vector @@ to_tsquery('%s')" % term
+    
+    if 'muni' in request.GET:
+        try:
+            muni = int(request.GET['muni'])
+            condition = condition + (" and muni_id = %d" % muni)
+        except:
+            pass
+    
+    from django.db import connection
+    
+    statement = "select %s from scrape_cc_transcript where %s group by week order by week" % (select, condition)
+    
+    data = []
+    cursor = connection.cursor()
+    cursor.execute(statement)
+    for row in cursor:
+        data.append(row[1])
+    
+    dmax = max(data)
+    dmin = min(data)
+    
+    # scale to 0-100 if it won't cause a division by zero, otherwise set everything to 50
+    if dmax - dmin > 0:
+        out = [round(100 * (float(x - dmin) / float(dmax - dmin))) for x in data]
+    else:
+        out = [50 for x in data]
+    
+    return HttpResponse(json.dumps(out), mimetype="application/json")
+    
+    
