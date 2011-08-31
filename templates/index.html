@@ -4,13 +4,15 @@
 <link rel="stylesheet" type="text/css" href="/static/styles/polymaps.css" />
 <script type="text/javascript" src="/static/js/jquery-1.6.2.min.js"></script>
 <script type="text/javascript" src="/static/js/polymaps.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery.svg.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery.svgdom.min.js"></script>
 <script type="text/javascript">
 $(function() {
     var po = org.polymaps;
     
     var map = po.map()
         .container(document.getElementById('map').appendChild(po.svg('svg')))
-        .center({lat: 37.787, lon: -122.228})
+        .center({lat: 37.787, lon: -100})
         .zoom(4)
         .zoomRange([0, 11])
         .add(po.drag())
@@ -33,25 +35,61 @@ $(function() {
             round++;
             round %= hosts.length;
             var url = "http://" + hosts[round] + ".tiles.mapbox.com/mapbox/1.0.0/world-bright/" + c.zoom + "/" + x + "/" + y + ".png";
-            console.log(url);
-                        
+            
             return url;
         }));
     
-    geo = po.geoJson();
-    map.add(po.geoJson()
-        .url("/geo.json?term=pollution")
+    var geo = po.geoJson()
         .clip(false)
         .zoom(5)
         .on('load', function(e) {
-            console.log(e);
-            for (var i = 0; i < e.features.length; i++) {
-                e.features[i].element.setAttribute("r", Math.pow(2, e.tile.zoom - 4) * Math.sqrt(e.features[i].data.properties.occurrences))
-            }
-        }));
+            $.each(e.features, function(i, feature) {
+                var circle = $(e.features[i].element);
+                circle.attr("r", Math.pow(2, e.tile.zoom - 4) * Math.sqrt(feature.data.properties.occurrences));
+                circle.hover(function() {
+                    $(this).css({'fill': '#cc4444', 'fill-opacity': '0.75', 'stroke': '#660000'});
+                    $('#map .map-tip').html('<div class="city">' + feature.data.properties.entity + '</div><div class="occurrences" id="occurrences-' + feature.data.properties.entity_id + '">Occurrences of <strong>&ldquo;' + search_term + '&rdquo;</strong>: <strong>' + feature.data.properties.occurrences + '</strong>').show();
+                    $.getJSON('/sparkline.json?muni=' + feature.data.properties.entity_id + '&term=' + encodeURIComponent(search_term), function(data) {
+                        $('#occurrences-' + feature.data.properties.entity_id).append('<img src="https://chart.googleapis.com/chart?chs=100x30&cht=ls&chco=CC0000&chf=bg,s,00000000&chd=t:' + data.join(',') + '" />')
+                    })
+                }, function() {
+                    $(this).css({'fill': '', 'fill-opacity': '', 'stroke': ''});
+                    $('#map .map-tip').hide();
+                })
+            });
+        });
+    
+    map.add(geo);
     
     map.add(po.compass()
         .pan("none"));
+    
+    // done setting up map; set up labels
+    $('#map').append('<div class="map-label">').append('<div class="map-tip">');
+    
+    var search_term = "";
+    var search = function(term) {
+        search_term = term;
+        
+        var uterm = encodeURIComponent(term);
+        
+        geo.url("/geo.json?term=" + uterm);
+        
+        $('#map .map-label').html('<span>' + term + '</span>');
+        
+        // sparkline
+        $.getJSON('/sparkline.json?term=' + uterm, function(data) {
+            $('#map .map-label').append('<img src="https://chart.googleapis.com/chart?chs=100x30&cht=ls&chco=CC0000&chf=bg,s,00000000&chd=t:' + data.join(',') + '" />')
+        })
+    }
+    
+    search('police');
+    
+    // set up search box
+    $('#search').submit(function() {
+        search($(this).find('input[type=text]').val());
+        return false;
+    })
 });
 </script>
 {% endblock %}
@@ -59,9 +97,9 @@ $(function() {
 {% block content %}
 
     <div class="left">
-        <form action="#" method="POST">
+        <form id="search" action="#" method="POST">
             <label for="term" >See who's talking about</label>
-            <input class="search-box" type="text" name="term" placeholder="taxes" />
+            <input class="search-box" type="text" name="term" placeholder="police" />
             <input class="submit" type="submit" value="!" />
         </form>
         <ul class="popular">

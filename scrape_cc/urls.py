@@ -7,6 +7,7 @@ urlpatterns = patterns('scrape_cc.views',
     url(r'^about/$', direct_to_template, {'template': 'about.html'}, name='about'),
     url(r'^cloud/$', 'cloud', name='cloud'),
     url(r'^geo.json', 'geo_json', name='geo_json'),
+    url(r'^sparkline.json', 'sparkline', name='sparkline')
 
 )
 

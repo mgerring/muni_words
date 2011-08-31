@@ -46,7 +46,7 @@ svg {
 }
 
 .layer circle {
-    fill: lightcoral;
+    fill: #ffcccc;
     fill-opacity: 0.5;
-    stroke: brown;
+    stroke: #cc0000;
 }
