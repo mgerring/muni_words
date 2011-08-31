@@ -83,8 +83,8 @@ $(function() {
         })
     }
     
-    search('police');
-    
+//    search('police');
+    search($('.search-box').attr('placeholder'));  
     // set up search box
     $('#search').submit(function() {
         search($(this).find('input[type=text]').val());
