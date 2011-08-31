@@ -1,4 +1,61 @@
 {% extends "base.html" %}
+
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="/static/styles/polymaps.css" />
+<script type="text/javascript" src="/static/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="/static/js/polymaps.min.js"></script>
+<script type="text/javascript">
+$(function() {
+    var po = org.polymaps;
+    
+    var map = po.map()
+        .container(document.getElementById('map').appendChild(po.svg('svg')))
+        .center({lat: 37.787, lon: -122.228})
+        .zoom(4)
+        .zoomRange([0, 11])
+        .add(po.drag())
+        .add(po.wheel().smooth(false))
+        .add(po.dblclick())
+        .add(po.arrow());
+    
+    var round = 0;
+    var hosts = ['a', 'b', 'c', 'd'];
+    map.add(po.image()
+        .url(function(c) {
+            // Set X to c.column, but wrapped around in the range [0, numTiles)
+            var x = c.column % (1 << c.zoom);
+            if (x < 0) {
+                x = x + (1 << c.zoom)
+            }
+            // Set Y to numTiles - c.row, to account for TMS doing lat backwards
+            var y = (1 << c.zoom) - c.row - 1;
+            
+            round++;
+            round %= hosts.length;
+            var url = "http://" + hosts[round] + ".tiles.mapbox.com/mapbox/1.0.0/world-bright/" + c.zoom + "/" + x + "/" + y + ".png";
+            console.log(url);
+                        
+            return url;
+        }));
+    
+    geo = po.geoJson();
+    map.add(po.geoJson()
+        .url("/geo.json?term=pollution")
+        .clip(false)
+        .zoom(5)
+        .on('load', function(e) {
+            console.log(e);
+            for (var i = 0; i < e.features.length; i++) {
+                e.features[i].element.setAttribute("r", Math.pow(2, e.tile.zoom - 4) * Math.sqrt(e.features[i].data.properties.occurrences))
+            }
+        }));
+    
+    map.add(po.compass()
+        .pan("none"));
+});
+</script>
+{% endblock %}
+
 {% block content %}
 
     <div class="left">
@@ -17,8 +74,7 @@
         </ul>
     </div>
     <div style="clear:both;"></div>
-    <div class="map">
-        map goes here
+    <div class="map" id="map">
     </div>
 
 {% endblock %}

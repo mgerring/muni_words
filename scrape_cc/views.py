@@ -28,6 +28,13 @@ def geo_json(request):
             where = ["text_vector @@ to_tsquery('%s')" % term]
         )
     
+    # aggregate munis
+    munis = {}
+    for transcript in qs:
+        if transcript.muni.id not in munis:
+            munis[transcript.muni.id] = []
+        munis[transcript.muni.id].append(transcript)
+    
     # build GeoJSON
     out = {
         'type': 'FeatureCollection',
@@ -36,14 +43,13 @@ def geo_json(request):
             'type': 'Feature',
             'geometry': {
                 'type': 'Point',
-                'coordinates': transcript.muni.lat_long.coords,
+                'coordinates': muni[0].muni.lat_long.coords,
             },
             'properties': {
-                'entity': transcript.muni.name,
-                'occurrences': transcript.occurrences,
-                'date': str(transcript.date.date()),
+                'entity': muni[0].muni.name,
+                'occurrences': sum([transcript.occurrences for transcript in muni]),
             }
-        } for transcript in qs if transcript.muni.lat_long is not None]
+        } for muni in munis.values() if muni[0].muni.lat_long is not None]
     }
     
     return HttpResponse(json.dumps(out), mimetype="application/json")
