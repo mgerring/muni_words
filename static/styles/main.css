@@ -43,8 +43,8 @@ ul.popular li { list-style-type: none; float:left; padding: 10px;  }
 ul.popular li a, ul.popular li a:visited { color:black; }
 
 h2 { font-size: 1.5em; margin-top:20px; }
-div.tag-cloud { margin: 20px auto; width: 450px; }
-div.tag-cloud a { color: #484944;}
+div.tag-cloud { margin: 20px auto; width: 550px; }
+div.tag-cloud a { color: #484944; padding: 5px; }
 div.tag-cloud a.size-1 {font-size: 1.1em; } 
 div.tag-cloud a.size-2 {font-size: 1.2em; }
 div.tag-cloud a.size-3 {font-size: 1.3em; }

@@ -4,7 +4,7 @@ from django.http import HttpResponse
 import json
 import re
 from scrape_cc import models
-
+from django.views.decorators.cache import cache_page
 from django.db.models import Sum
 
 TERM_CLEANER = re.compile('[^\w\s]+')
@@ -60,23 +60,28 @@ def geo_json(request):
     }
     
     return HttpResponse(json.dumps(out), mimetype="application/json")
-    
+   
+   
+@cache_page(60 * 60 * 2)    
 def cloud(request):
-    
-    #call some helper function to get a list of the most frequent words instead of this placeholder
-    tags = [{ 'tag': 'django', 'size': 10 },
-            { 'tag': 'python', 'size': 8 },
-            { 'tag': 'Australia', 'size': 1 },
-            { 'tag': 'coffee', 'size': 6 },
-            { 'tag': 'pycon', 'size': 3 },
-            { 'tag': 'html', 'size': 9 },
-            { 'tag': 'python', 'size': 8 },
-            { 'tag': 'Australia', 'size': 1 },
-            { 'tag': 'coffee', 'size': 6 },
-            { 'tag': 'pycon', 'size': 3 },
-            { 'tag': 'html', 'size': 9 },
+    from django.db import connection, transaction
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM ts_stat('SELECT text_vector FROM scrape_cc_transcript') ORDER BY nentry DESC, word LIMIT 150;")
+    tags = []
+    words = cursor.fetchall()
+    high = int(words[0][2])
+    low = int(words[-1][2])
+    step = (high - low) / 10 
 
-            ]
+    for row in words:
+        freq = int(row[2])
+        tag_weight = 1
+        while freq > low + (step * tag_weight) and tag_weight < 10:
+            tag_weight = tag_weight + 1
+
+        tags.append({'tag': row[0], 'size': tag_weight })
+
+    #call some helper function to get a list of the most frequent words instead of this placeholder
 
     return render_to_response('cloud.html', {'data': tags }, context_instance=RequestContext(request))
 
