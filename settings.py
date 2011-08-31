@@ -150,6 +150,12 @@ LOGGING = {
     }
 }
 
+CACHES = {
+    'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'muni-words-cache',
+    }
+}
 try:
     from local_settings import *
 except:
