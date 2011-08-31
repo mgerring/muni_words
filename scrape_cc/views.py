@@ -60,6 +60,8 @@ def geo_json(request):
     }
     
     return HttpResponse(json.dumps(out), mimetype="application/json")
+   
+   
     
 def cloud(request):
     from django.db import connection, transaction
@@ -75,8 +77,7 @@ def cloud(request):
         freq = int(row[2])
         tag_weight = 1
         interval = low
-        while freq > interval:
-            interval = interval + (step * tag_weight)
+        while freq > low + (step * tag_weight) and tag_weight < 10:
             tag_weight = tag_weight + 1
 
         tags.append({'tag': row[0], 'size': tag_weight })
