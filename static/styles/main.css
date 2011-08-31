@@ -20,6 +20,7 @@ div.header h1 { font-family: 'Waiting for the Sunrise', cursive; font-weight: bo
 div.header h1 a { text-decoration: none; }
 div.header h1 a:visited { color: #484944; }
 div.header img { display:block; float: right; }
+div.content { min-height: 550px; }
 
 ul.nav { float:right; width: 1024px; list-style-type: none; }
 ul.nav li { float: right; width: 120px; margin: 10px; list-style-type:none; font-size: 16px; font-weight: bold; text-decoration: none;}
