@@ -13,13 +13,13 @@ menu, nav, section, summary, time, mark, audio, video {
 }  
 
 
-body { color: #484944; font-family: georgia, serif; margin-bottom: 300px; background: #fff8ee url('../img/city.png') no-repeat bottom center; background-size: 1200px 560px; height: 100%; }
+body { color: #484944; font-family: georgia, serif; margin-bottom: 300px; background: #fff8ee; no-repeat bottom center; background-size: 1200px 560px; height: 100%; }
 body p { margin: 20px; width: 660px; line-height: 30px;}
 div.container { width: 960px; margin: 0 auto; background: rgba(255,255,255,0.8); padding: 20px; padding-top: 0px; border: 1px solid rgba(225,225,225,0.9) }
-div.header h1 { font-family: 'Waiting for the Sunrise', cursive; font-weight: bold; font-size: 75px; display: block; vertical-align: bottom; margin-top: 25px; margin-right: 250px; letter-spacing: 4px; margin: -20px; margin-bottom: 0px; padding: 20px; padding-bottom: 15px; background: #f9efe1; }
+div.header h1 { font-family: 'Waiting for the Sunrise', cursive; font-weight: bold; font-size: 55px; display: block; vertical-align: bottom; margin-top: 25px; margin-right: 250px; letter-spacing: 4px; margin: 0px; margin-bottom: 0px; padding: 20px; padding-bottom: 15px; float:left;width: 450px; }
 div.header h1 a { text-decoration: none; }
 div.header h1 a:visited { color: #484944; }
-div.header img { display:block; float: right; }
+div.header img { display:block; float:right; }
 div.content { min-height: 550px; }
 
 ul.nav { float:right; width: 1024px; list-style-type: none; }
