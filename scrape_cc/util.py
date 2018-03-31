@@ -99,7 +99,7 @@ def get_clips():
                                       }
                             }""" % (m.granicus_id, six_months_ago)
 
-        resp, content = h.request("http://govflix.com/api", "POST", body=es_filter_data)
+        resp, content = h.request("http://search.granicus.com/api", "POST", body=es_filter_data)
 
         if resp.get('status') == '200':
             
@@ -107,7 +107,7 @@ def get_clips():
             total = total_json['hits']['total']
             es_filter_data = '{ "size": %d, "query": {"term": {"agency_id": "%s" }},  "filter": { "range": { "datetime": { "from": "%s", "include_lower": true}}}}' % ( total, m.granicus_id, six_months_ago)
 
-            resp, content = h.request("http://govflix.com/api", "POST", body=es_filter_data)
+            resp, content = h.request("http://search.granicus.com/api", "POST", body=es_filter_data)
             try:
                 m_json = json.loads(content, strict=False)
                 videos = m_json['hits']['hits']
@@ -147,14 +147,14 @@ def remove_excluded():
 
 def import_muni():
     
-    api_url = "http://govflix.com/api?type=agency&size=1"
+    api_url = "http://search.granicus.com/api?type=agency&size=1"
     response, text  = h.request(api_url)
 
     if response.get('status') == '200':
         agencies = json.loads(text, strict=False)
         total_agencies = agencies['hits']['total']
         
-        response, text = h.request("http://govflix.com/api?type=agency&size=%s" % total_agencies)
+        response, text = h.request("http://search.granicus.com/api?type=agency&size=%s" % total_agencies)
         agencies = json.loads(text, strict=False)
     
         for agency in agencies['hits']['hits']:
